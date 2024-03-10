@@ -1,1 +1,358 @@
-# project-setup
+# Setup
+
+## .editorconfig
+
+```
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_size = 2
+indent_style = space
+```
+
+## Technology stack
+
+- Eslint
+- Prettier
+- Husky
+- Webpack
+- Typescript
+
+![alt text](image.png)
+
+## package.json
+
+```
+{
+"name": "YOUR PROJECT NAME",
+"version": "1.0.0",
+"description": "YOUR PROJECT DESCRIPTION",
+"main": "index.ts", //.js
+
+"devDependencies": {
+"@commitlint/cli": "^19.0.3",
+"@commitlint/config-conventional": "^19.0.3",
+"@typescript-eslint/eslint-plugin": "^7.1.1",
+"eslint": "^8.2.0",
+"eslint-config-prettier": "^9.1.0",
+"eslint-plugin-import": "^2.29.1",
+"husky": "^9.0.11",
+"prettier": "3.1.1",
+"typescript": "^5.4.2",
+"webpack-cli": "^5.1.4"
+},
+
+"scripts": {
+    "format:fix": "prettier --write .",
+    "lint": "eslint .  --no-error-on-unmatched-pattern   --ext ts ",
+    "lint:fix": "eslint . --fix --ext ts",
+    "prepare": "husky",
+    "start": "webpack serve --open --config ./webpack.config.js --env mode=dev",
+    "build": "webpack --config ./webpack.config.js --env mode=prod",
+},
+
+"author": "Kate Goncharik",
+"license": "ISC"
+}
+```
+
+### Eslint
+
+1. Install -
+
+- "@typescript-eslint/eslint-plugin": "^7.1.1",
+- "eslint": "^8.2.0",
+- "eslint-config-prettier": "^9.1.0",
+- "eslint-plugin-import": "^2.29.1",
+
+2. Configure .eslintrc.json
+
+```
+{
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["import", "@typescript-eslint"],
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:import/recommended", "prettier"],
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "env": {
+    "es6": true,
+    "browser": true,
+    "node": true
+  },
+  "rules": {
+    "curly": ["error", "all"],
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/explicit-function-return-type": "error",
+    "no-debugger": "off",
+    "no-console": "off",
+    "class-methods-use-this": "off"
+  },
+  "settings": {
+    "import/extensions": [".ts"],
+    "import/resolver": {
+      "typescript": true
+    },
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts"]
+    }
+  }
+}
+```
+
+3. Configure .eslintignore
+
+```
+dist
+node_modules
+**/*.js
+webpack.config.js
+```
+
+4. Add script
+
+```
+"lint": "eslint . --ext ts ", // --no-error-on-unmatched-pattern, if there are no ts files yet
+"lint:fix": "eslint . --fix --ext ts",
+```
+
+## Prettier
+
+1. Install
+   "prettier": "3.1.1"
+2. Configure .prettierc
+
+```json
+{
+  "trailingComma": "es5",
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 120
+}
+```
+
+3. Configure .prettierignore
+
+```
+.prettierignore
+dist
+node_modules
+assets
+**/*.js
+```
+
+4. Add script
+
+```json
+"format:fix": "prettier --write .",
+```
+
+## Husky
+
+(It has to be on the same level with .git)
+
+1. Install
+
+```json
+"husky": "^9.0.11",
+```
+
+2. Configure hooks
+
+- pre-commit:
+
+```json
+
+# !/usr/bin/env sh
+
+. "$(dirname -- "$0")/\_/husky.sh"
+
+npm run format:fix
+
+```
+
+- pre-push:
+
+```json
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npm run lint
+npm run format:fix
+```
+
+(requires config 'commitlint.config.js')
+
+- commit-msg:
+
+```json
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npx --no -- commitlint --edit ${1}
+```
+
+### commitlint.config.js
+
+```js
+module.exports = { extends: ['@commitlint/config-conventional'] };
+```
+
+## Webpack
+
+1. Install
+
+```json
+"webpack-cli": "^5.1.4"
+```
+
+2. Configure webpack.config.js
+
+```js
+const path = require('path');
+const { merge } = require('webpack-merge');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const EslintPlugin = require('eslint-webpack-plugin');
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
+
+const baseConfig = {
+  entry: path.resolve(__dirname, './src/index'),
+  mode: 'development',
+  module: {
+    rules: [
+      {
+        test: /\.ts$/i,
+        use: 'ts-loader',
+      },
+      {
+        test: /\.css$/i,
+        use: ['style-loader', 'css-loader'],
+      },
+      //ADD RULE FOR SCSS, IF NEEDED
+      {
+        test: /.(png|svg|jpg|jpeg|gif|woff(2)?)$/i,
+        type: 'asset/resource',
+      },
+    ],
+  },
+  resolve: {
+    extensions: ['.ts', '.js'],
+    plugins: [new TsconfigPathsPlugin()],
+  },
+  output: {
+    filename: 'index.js',
+    path: path.resolve(__dirname, './dist'),
+    clean: true,
+  },
+  plugins: [
+    new EslintPlugin({ extensions: 'ts' }),
+    new HtmlWebpackPlugin({
+      template: path.resolve(__dirname, './src/index.html'),
+      filename: 'index.html',
+      favicon: './src/assets/icons/favicon.png', //UPDATE URL
+    }),
+  ],
+};
+
+module.exports = ({ mode }) => {
+  const isProductionMode = mode === 'prod';
+  const envConfig = isProductionMode ? require('./webpack.prod.config') : require('./webpack.dev.config');
+
+  return merge(baseConfig, envConfig);
+};
+```
+
+3. Configure webpack.dev.config.js
+
+```js
+const path = require('path');
+
+module.exports = {
+  mode: 'development',
+  devtool: 'inline-source-map',
+  devServer: {
+    static: {
+      directory: path.resolve(__dirname, '../dist'),
+    },
+    compress: true,
+    port: 9000,
+    hot: true,
+    historyApiFallback: true,
+  },
+```
+
+4. Configure webpack.prod.config.js
+
+```js
+module.exports = {
+  mode: 'production',
+};
+```
+
+5. Add scripts
+
+```json
+"start": "webpack serve --open --config ./webpack.config.js --env mode=dev",
+"build": "webpack --config ./webpack.config.js --env mode=prod",
+```
+
+## Typescript
+
+1. Install
+
+```json
+"typescript": "^5.4.2", // npm i typescript --save-dev
+
+```
+
+2. Init TS
+
+```txt
+npx tsc --init
+```
+
+3. Configure tsconfig.json
+
+```json
+{
+  "compilerOptions": {
+    /* Essential defaults */
+    "esModuleInterop": true /* CJS/ESM interop */,
+    "skipLibCheck": true /* Do not check declaration files in node_modules/ */,
+    "target": "es2022" /* Ignored by Vite bundler https://vitejs.dev/guide/features.html#target */,
+    "allowJs": true /* set to false if migration from JS to TS is not needed */,
+    "verbatimModuleSyntax": true /* Remove every import/export with 'type' modifier during transpilation */,
+    "resolveJsonModule": true /* allow importing JSON files as modules */,
+    "isolatedModules": true /* warns when writing code that can’t be correctly interpreted by a single-file transpilation process */,
+    "moduleDetection": "force" /* every non-declaration file is treated as a module */,
+    "useDefineForClassFields": true /* conform to ECMA standard for class field syntax */,
+    "allowSyntheticDefaultImports": true,
+
+    /* Strictness */
+    "strict": true /* most important option which enables many other strict options */,
+    "noImplicitAny": true /* not needed (auto-enabled when 'strict: true'), but required by RS School */,
+    "noUncheckedIndexedAccess": true /* forbids unsafe indexing of Records and arrays */,
+
+    /* Transpilation performed by bundler */
+    "moduleResolution": "bundler" /* use bundler's module resolution, should be enabled in all Webpack / Vite projects */,
+    "module": "ESNext" /* used module system */,
+    "noEmit": true /* Don't emit outputs, only perform type-checking */,
+
+    /* DOM types for frontend projects */
+    "lib": ["es2022", "dom", "dom.iterable"],
+
+    /* Path aliases */
+    "baseUrl": "",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["**/*.ts"]
+}
+```
