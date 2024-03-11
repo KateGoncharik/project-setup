@@ -32,6 +32,7 @@ indent_style = space
   "version": "1.0.0",
   "description": "RSS-puzzle",
   "main": "index.ts",
+  "private": true,
   "devDependencies": {
     "@commitlint/cli": "^19.0.3",
     "@commitlint/config-conventional": "^19.0.3",
@@ -43,6 +44,7 @@ indent_style = space
     "eslint-plugin-import": "^2.29.1",
     "eslint-webpack-plugin": "^4.0.1",
     "html-webpack-plugin": "^5.6.0",
+@typescript-eslint/parser // установить
     "husky": "^9.0.11",
     "prettier": "3.1.1",
     "style-loader": "^3.3.4",
@@ -98,7 +100,7 @@ indent_style = space
     "@typescript-eslint/explicit-function-return-type": "error",
     "no-debugger": "off",
     "no-console": "off",
-    "class-methods-use-this": "off"
+    "class-methods-use-this": "on" // не стоит отключать
   },
   "settings": {
     "import/extensions": [".ts"],
@@ -118,7 +120,6 @@ indent_style = space
 dist
 node_modules
 **/*.js
-webpack.config.js
 ```
 
 4. Add script
@@ -136,7 +137,7 @@ webpack.config.js
 
 ```json
 {
-  "trailingComma": "es5",
+  "trailingComma": "all", // default
   "semi": true,
   "singleQuote": true,
   "printWidth": 120
@@ -150,7 +151,7 @@ webpack.config.js
 dist
 node_modules
 assets
-**/*.js
+**/*.js // можно убрать
 ```
 
 4. Add script
@@ -175,10 +176,6 @@ assets
 
 ```json
 
-# !/usr/bin/env sh
-
-. "$(dirname -- "$0")/\_/husky.sh"
-
 npm run format:fix
 
 ```
@@ -186,11 +183,10 @@ npm run format:fix
 - pre-push:
 
 ```json
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
 
 npm run lint
 npm run format:fix
+
 ```
 
 (requires config 'commitlint.config.js')
@@ -198,10 +194,9 @@ npm run format:fix
 - commit-msg:
 
 ```json
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
 
 npx --no -- commitlint --edit ${1}
+
 ```
 
 ### commitlint.config.js
