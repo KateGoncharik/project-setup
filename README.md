@@ -28,36 +28,42 @@ indent_style = space
 
 ```
 {
-"name": "YOUR PROJECT NAME",
-"version": "1.0.0",
-"description": "YOUR PROJECT DESCRIPTION",
-"main": "index.ts", //.js
-
-"devDependencies": {
-"@commitlint/cli": "^19.0.3",
-"@commitlint/config-conventional": "^19.0.3",
-"@typescript-eslint/eslint-plugin": "^7.1.1",
-"eslint": "^8.2.0",
-"eslint-config-prettier": "^9.1.0",
-"eslint-plugin-import": "^2.29.1",
-"husky": "^9.0.11",
-"prettier": "3.1.1",
-"typescript": "^5.4.2",
-"webpack-cli": "^5.1.4"
-},
-
-"scripts": {
+  "name": "rss-puzzle",
+  "version": "1.0.0",
+  "description": "RSS-puzzle",
+  "main": "index.ts",
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.3",
+    "@commitlint/config-conventional": "^19.0.3",
+    "@typescript-eslint/eslint-plugin": "^7.1.1",
+    "css-loader": "^6.10.0",
+    "eslint": "^8.2.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-webpack-plugin": "^4.0.1",
+    "html-webpack-plugin": "^5.6.0",
+    "husky": "^9.0.11",
+    "prettier": "3.1.1",
+    "style-loader": "^3.3.4",
+    "ts-loader": "^9.5.1",
+    "tsconfig-paths-webpack-plugin": "^4.1.0",
+    "typescript": "^5.4.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.2"
+  },
+  "scripts": {
     "format:fix": "prettier --write .",
     "lint": "eslint .  --no-error-on-unmatched-pattern   --ext ts ",
     "lint:fix": "eslint . --fix --ext ts",
     "prepare": "husky",
     "start": "webpack serve --open --config ./webpack.config.js --env mode=dev",
-    "build": "webpack --config ./webpack.config.js --env mode=prod",
-},
-
-"author": "Kate Goncharik",
-"license": "ISC"
+    "build": "webpack --config ./webpack.config.js --env mode=prod"
+  },
+  "author": "Kate Goncharik",
+  "license": "ISC"
 }
+
 ```
 
 ### Eslint
@@ -209,7 +215,12 @@ module.exports = { extends: ['@commitlint/config-conventional'] };
 1. Install
 
 ```json
-"webpack-cli": "^5.1.4"
+"webpack-cli": "^5.1.4",
+"eslint-webpack-plugin": "^4.0.1",
+"html-webpack-plugin": "^5.6.0",
+"style-loader": "^3.3.4",
+"ts-loader": "^9.5.1",
+"css-loader": "^6.10.0",
 ```
 
 2. Configure webpack.config.js
@@ -222,7 +233,7 @@ const EslintPlugin = require('eslint-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 
 const baseConfig = {
-  entry: path.resolve(__dirname, './src/index'),
+  entry: path.resolve(__dirname, './index'),
   mode: 'development',
   module: {
     rules: [
@@ -234,7 +245,6 @@ const baseConfig = {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
       },
-      //ADD RULE FOR SCSS, IF NEEDED
       {
         test: /.(png|svg|jpg|jpeg|gif|woff(2)?)$/i,
         type: 'asset/resource',
@@ -253,9 +263,9 @@ const baseConfig = {
   plugins: [
     new EslintPlugin({ extensions: 'ts' }),
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, './src/index.html'),
+      template: path.resolve(__dirname, './index.html'),
       filename: 'index.html',
-      favicon: './src/assets/icons/favicon.png', //UPDATE URL
+      favicon: './src/assets/icons/favicon.jpg',
     }),
   ],
 };
@@ -266,6 +276,7 @@ module.exports = ({ mode }) => {
 
   return merge(baseConfig, envConfig);
 };
+
 ```
 
 3. Configure webpack.dev.config.js
